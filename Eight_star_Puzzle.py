@@ -75,8 +75,7 @@ def search_agent(start_state, goal_state):
                 node = node.parent
             # print('Total nodes explored', nodes_explored)
             return path[::-1]
-        for successor in get_successors(node):
-            # queue.append(successor)
+        for successor in get_successors(node): # queue.append(successor)
             # push scucessor with updated "g" value in frontier
             heapq.heappush(frontier, (successor.g, successor))
     # print('Total nodes explored', nodes_explored)
