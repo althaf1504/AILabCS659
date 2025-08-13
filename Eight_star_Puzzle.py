@@ -17,7 +17,7 @@ def heuristic(node, goal_state):
     return h
 
 def get_successors(node):
-    successors = []
+    successors =  Node(new_state, node, node.g+1, heuristic(node, goal_state))
     value = 0
     index = node.state.index(0)
     quotient = index//3
