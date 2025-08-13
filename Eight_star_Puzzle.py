@@ -16,6 +16,7 @@ def heuristic(node, goal_state):
     h = 0
     return h
 
+#successors find all the possible steps from the given step
 def get_successors(node):
     successors =  Node(new_state, node, node.g+1, heuristic(node, goal_state))
     value = 0
@@ -50,6 +51,7 @@ def get_successors(node):
             successors.append(successor)            
     return successors
 
+#agent selects the best among all the possiblities
 def search_agent(start_state, goal_state):
     start_node = Node(start_state)
     goal_node = Node(goal_state)
