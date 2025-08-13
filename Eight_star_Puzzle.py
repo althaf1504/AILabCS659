@@ -29,7 +29,7 @@ def get_successors(node):
         moves = [-3, 3]
     if quotient == 2:
         moves = [-3]
-    # Column constrained moves
+   #Moves regarding the Colums
     if remainder == 0:
         moves += [1]
     if remainder == 1:
