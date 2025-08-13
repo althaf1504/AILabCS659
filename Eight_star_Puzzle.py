@@ -87,7 +87,8 @@ start_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
 s_node = Node(start_state)
 goal_state = [1, 2, 3, 4, 5, 0, 7, 8, 6] #final_state
 
-D = 20
+D = 20# allows the repetation for 20 times
+
 d = 0
 while d <= D:
     goal_state = random.choice(list(get_successors(s_node))).state
