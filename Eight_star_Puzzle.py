@@ -1,6 +1,4 @@
-# from collections import deque
 import heapq
-# heapq for prioritizing on "g"
 import numpy as np
 import random
 
@@ -9,7 +7,7 @@ class Node:
         self.state = state
         self.parent = parent
         self.g = g # distance to root
-        self.h = # estimated distance to goal
+        self.h = h # estimated distance to goal
         self.f = g + h # evaluation function
     def __lt__(self, other):
         return self.g < other.g
