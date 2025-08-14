@@ -2,7 +2,7 @@ from collections import deque
 
 def is_valid(state):
     jug1, jug2, jug3 = state
-    if 
+    if jug1>8 or jug2>5 or jug3>3 or jug1<0 or jug2<0 or jug3<0:#The conditions for the jugs in 3 Jugs problem.
         return False
     return True
 
@@ -39,7 +39,7 @@ def bfs(start_state, goal_state):
     return None
 
 start_state = (8, 0, 0)
-goal_state = 
+goal_state =  (4, 4, 0)#final state where in both of Jugs(8,5) have 4Liter water in them 
 
 solution = bfs(start_state, goal_state)
 if solution:
