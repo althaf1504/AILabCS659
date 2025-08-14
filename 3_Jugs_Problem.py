@@ -2,44 +2,44 @@ from collections import deque
 
 def is_valid(state):
     jug1, jug2, jug3 = state
-    if jug1>8 or jug2>5 or jug3>3 or jug1<0 or jug2<0 or jug3<0:#The conditions for the jugs in 3 Jugs problem.
-        return False
-    return True
+    return 0 <= jug1 <= 8 and 0 <= jug2 <= 5 and 0 <= jug3 <= 3
 
 def get_successors(state):
-    successors = []
     jug1, jug2, jug3 = state
+    capacities = (8, 5, 3)
+    successors = []
     
-        moves = []
-        for move in moves:
-            new_state = 
-            if is_valid(new_state):
-                successors.append(new_state)
-    else:
-        moves = []
-        for move in moves:
-            new_state = 
-            if is_valid(new_state):
-                successors.append(new_state)
+    # Try pouring from one jug to another
+    for i in range(3):
+        for j in range(3):
+            if i != j:
+                amounts = [jug1, jug2, jug3]
+                # Pour from jug i to jug j
+                pour_amount = min(amounts[i], capacities[j] - amounts[j])
+                amounts[i] -= pour_amount
+                amounts[j] += pour_amount
+                new_state = tuple(amounts)
+                if is_valid(new_state):
+                    successors.append(new_state)
     return successors
 
 def bfs(start_state, goal_state):
     queue = deque([(start_state, [])])
     visited = set()
     while queue:
-        (state, path) = queue.pop()
+        state, path = queue.popleft()
         if state in visited:
             continue
         visited.add(state)
         path = path + [state]
-        if check_goal_state(state):
+        if state == goal_state:
             return path
         for successor in get_successors(state):
             queue.append((successor, path))
     return None
 
 start_state = (8, 0, 0)
-goal_state =  (4, 4, 0)#final state where in both of Jugs(8,5) have 4Liter water in them 
+goal_state = (4, 4, 0)
 
 solution = bfs(start_state, goal_state)
 if solution:
