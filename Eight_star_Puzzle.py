@@ -1,6 +1,5 @@
 import heapq
 import numpy as np
-import random
 class Node:
     def __init__(self, state, parent=None, g=0, h=0):
         self.state = state
