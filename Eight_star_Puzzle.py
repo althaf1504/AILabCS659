@@ -83,7 +83,7 @@ def search_agent(start_state, goal_state):
 
 start_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
 s_node = Node(start_state)
-goal_state = [1, 2, 3, 4, 5, 7, 0, 8, 6]
+goal_state = [1, 2, 3, 4, 5, 7, 0, 8, 6] #Goal state can be modified to get the required OUTPUT for any state but it might take a few more steps to reach the Goal state 
     # print(goal_state)
 # D = 20
 # d = 0
