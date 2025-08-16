@@ -10,10 +10,6 @@ class Node:
     def __lt__(self, other):
         return self.g < other.g
 
-def heuristic(node, goal_state):
-    h = 0
-    return h
-
 def get_successors(node):
     successors = []
     value = 0
@@ -35,7 +31,7 @@ def get_successors(node):
     if remainder == 2:
         moves += [-1]
 
-    # moves = [-1, 1, 3, -3]
+   
     for move in moves:
         im = index+move
         if im >= 0 and im < 9:
@@ -47,6 +43,10 @@ def get_successors(node):
             #print(successor.g)
             successors.append(successor)            
     return successors
+    
+def heuristic(node, goal_state):
+    h = 0
+    return h
 
 def search_agent(start_state, goal_state):
     start_node = Node(start_state)
