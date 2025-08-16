@@ -12,33 +12,34 @@ class Node:
 
 def get_successors(node):
     successors = []
-    index = node.state.index(0)
+    index = node.state.index(0)  # position of empty tile (0)
     quotient = index // 3
     remainder = index % 3
     moves = []
 
     # Row constrained moves
     if quotient == 0:
-        moves = [3]
-    if quotient == 1:
-        moves = [-3, 3]
-    if quotient == 2:
-        moves = [-3]
+        moves = [3]             # can only move down
+    elif quotient == 1:
+        moves = [-3, 3]         # can move up and down
+    elif quotient == 2:
+        moves = [-3]            # can only move up
 
     # Column constrained moves
     if remainder == 0:
-        moves += [1]
-    if remainder == 1:
-        moves += [-1, 1]
-    if remainder == 2:
-        moves += [-1]
+        moves += [1]            # can move right
+    elif remainder == 1:
+        moves += [-1, 1]        # can move left and right
+    elif remainder == 2:
+        moves += [-1]           # can move left
 
     for move in moves:
         im = index + move
-        if 0 <= im < 9:
+        if 0 <= im < 9:  # within bounds
             new_state = list(node.state)
-            new_state[index], new_state[im] = new_state[im], new_state[index]
-            successors.append(Node(new_state, node))
+            new_state[index], new_state[im] = new_state[im], new_state[index]  # swap
+            successor = Node(new_state, node)
+            successors.append(successor)            
     return successors
 
 def bfs(start_state, goal_state):
@@ -55,24 +56,26 @@ def bfs(start_state, goal_state):
         visited.add(tuple(node.state))
         nodes_explored += 1
 
-        if node.state == goal_node.state:
+        if node.state == list(goal_node.state):
             path = []
             while node:
                 path.append(node.state)
                 node = node.parent
-            print('Total nodes explored:', nodes_explored)
+            print('✅ Total nodes explored:', nodes_explored)
             return path[::-1]
 
         for successor in get_successors(node):
             queue.append(successor)
 
+    print('❌ No solution found. Nodes explored:', nodes_explored)
     return None
 
-# Initial state
-start_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
+
+# ---- Run Example ----
+start_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]  # initial state
 s_node = Node(start_state)
 
-# Generate a random reachable goal state by applying D moves
+# Generate a random reachable goal state
 D = 20
 d = 0
 while d <= D:
@@ -80,13 +83,12 @@ while d <= D:
     s_node = Node(goal_state)
     d += 1
 
-print("Start State:", start_state)
-print("Goal State:", goal_state)
+print("🎯 Goal State:", goal_state)
 
 solution = bfs(start_state, goal_state)
 if solution:
-    print("\nSolution found:")
+    print("✅ Solution found! Path:")
     for step in solution:
         print(step)
 else:
-    print("No solution found.")
+    print("❌ No solution found.")
