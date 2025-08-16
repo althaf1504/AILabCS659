@@ -19,12 +19,11 @@ def get_successors(node):
 
     # Row constrained moves
     if quotient == 0:
-        moves = [3]             # can only move down
+        moves = [3]             
     elif quotient == 1:
-        moves = [-3, 3]         # can move up and down
+        moves = [-3, 3]         
     elif quotient == 2:
-        moves = [-3]            # can only move up
-
+        moves = [-3]            
     # Column constrained moves
     if remainder == 0:
         moves += [1]            # can move right
@@ -71,17 +70,11 @@ def bfs(start_state, goal_state):
     return None
 
 
-# ---- Run Example ----
+-
 start_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]  # initial state
 s_node = Node(start_state)
 
-# Generate a random reachable goal state
-D = 20
-d = 0
-while d <= D:
-    goal_state = random.choice(get_successors(s_node)).state
-    s_node = Node(goal_state)
-    d += 1
+goal_state=[1, 2, 3, 4, 5, 0, 7, 8, 6]
 
 print("🎯 Goal State:", goal_state)
 
