@@ -1,0 +1,105 @@
+import heapq
+import re
+import numpy as np
+import nltk
+from nltk import sent_tokenize
+from nltk.corpus import stopwords
+
+nltk.download('punkt')
+nltk.download('stopwords')
+
+def preprocess_text(text):
+    """Tokenize and clean the text into normalized sentences."""
+    stop_words = set(stopwords.words('english'))
+    sentences = sent_tokenize(text)
+    clean_sentences = []
+    
+    for s in sentences:
+        s = s.lower()
+        s = re.sub(r'[^a-z0-9\s]', '', s)
+        words = [word for word in s.split() if word not in stop_words]
+        if words:
+            clean_sentences.append(" ".join(words))
+    
+    return clean_sentences
+
+def levenshtein_distance(s1, s2):
+    """Compute Levenshtein distance between two strings."""
+    len_s1, len_s2 = len(s1) + 1, len(s2) + 1
+    dp = np.zeros((len_s1, len_s2), dtype=int)
+    
+    dp[:, 0] = np.arange(len_s1)
+    dp[0, :] = np.arange(len_s2)
+    
+    for i in range(1, len_s1):
+        for j in range(1, len_s2):
+            cost = 0 if s1[i - 1] == s2[j - 1] else 1
+            dp[i, j] = min(
+                dp[i - 1, j] + 1,     # deletion
+                dp[i, j - 1] + 1,     # insertion
+                dp[i - 1, j - 1] + cost  # substitution
+            )
+    return dp[-1, -1]
+
+def heuristic(i, j, doc1, doc2):
+    """Estimate the remaining alignment cost."""
+    return abs((len(doc1) - i) - (len(doc2) - j))
+
+def astar_text_alignment(doc1, doc2):
+    """Perform A* search to align sentences between two documents."""
+    start = (0, 0)
+    goal = (len(doc1), len(doc2))
+    open_list = [(0, 0, start[0], start[1])]
+    visited = set()
+
+    while open_list:
+        f, g, i, j = heapq.heappop(open_list)
+        if (i, j) in visited:
+            continue
+        visited.add((i, j))
+
+        if (i, j) == goal:
+            return g  # total cost
+
+        neighbors = []
+        if i < len(doc1) and j < len(doc2):
+            cost = levenshtein_distance(doc1[i], doc2[j])
+            neighbors.append(((i + 1, j + 1), g + cost))
+        if i < len(doc1):
+            neighbors.append(((i + 1, j), g + 1))
+        if j < len(doc2):
+            neighbors.append(((i, j + 1), g + 1))
+
+        for (ni, nj), new_g in neighbors:
+            new_f = new_g + heuristic(ni, nj, doc1, doc2)
+            heapq.heappush(open_list, (new_f, new_g, ni, nj))
+
+    return float('inf')
+
+print("A* Search-Based Plagiarism Detection System")
+
+print("Enter first document (press Enter twice to finish):")
+lines = []
+while True:
+    line = input()
+    if line == "":
+        break
+    lines.append(line)
+text1 = "\n".join(lines)
+
+print("\nEnter second document (press Enter twice to finish):")
+lines = []
+while True:
+    line = input()
+    if line == "":
+        break
+    lines.append(line)
+text2 = "\n".join(lines)
+
+# Preprocess and compute cost
+doc1 = preprocess_text(text1)
+doc2 = preprocess_text(text2)
+
+total_cost = astar_text_alignment(doc1, doc2)
+
+print("\nTotal Alignment Cost:", total_cost)
