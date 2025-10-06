@@ -1,0 +1,73 @@
+#BFS
+from collections import deque
+
+# Function to generate all valid moves from a state
+def get_neighbors(state):
+    neighbors = []
+    n = len(state)
+    
+    for i, r in enumerate(state):
+        # East-bound rabbits (E1, E2, E3) move to the right
+        if r.startswith('E'):
+            # Move one step forward if empty
+            if i + 1 < n and state[i + 1] == '_':
+                new_state = state.copy()
+                new_state[i], new_state[i + 1] = new_state[i + 1], new_state[i]
+                neighbors.append(new_state)
+            # Jump over one rabbit
+            if i + 2 < n and state[i + 2] == '' and state[i + 1] != '':
+                new_state = state.copy()
+                new_state[i], new_state[i + 2] = new_state[i + 2], new_state[i]
+                neighbors.append(new_state)
+        
+        # West-bound rabbits (W1, W2, W3) move to the left
+        elif r.startswith('W'):
+            # Move one step forward if empty
+            if i - 1 >= 0 and state[i - 1] == '_':
+                new_state = state.copy()
+                new_state[i], new_state[i - 1] = new_state[i - 1], new_state[i]
+                neighbors.append(new_state)
+            # Jump over one rabbit
+            if i - 2 >= 0 and state[i - 2] == '' and state[i - 1] != '':
+                new_state = state.copy()
+                new_state[i], new_state[i - 2] = new_state[i - 2], new_state[i]
+                neighbors.append(new_state)
+                
+    return neighbors
+
+# BFS function to find the shortest path
+def bfs_rabbit_leap(initial, goal):
+    queue = deque([(initial, [initial])])  # Each element: (state, path)
+    visited = set()
+    
+    while queue:
+        state, path = queue.popleft()
+        
+        # Convert list to tuple for hashable set
+        state_tuple = tuple(state)
+        
+        if state == goal:
+            return path
+        
+        if state_tuple not in visited:
+            visited.add(state_tuple)
+            for neighbor in get_neighbors(state):
+                neighbor_tuple = tuple(neighbor)
+                if neighbor_tuple not in visited:
+                    queue.append((neighbor, path + [neighbor]))
+                    
+    return None
+
+# Initial and goal states (lists)
+initial_state = ['E1','E2','E3','_','W1','W2','W3']
+goal_state    = ['W1','W2','W3','_','E1','E2','E3']
+
+# Solve BFS
+RESULT_bfs = bfs_rabbit_leap(initial_state, goal_state)
+
+# Print solution step-by-step
+if RESULT_bfs:
+    for step, state in enumerate(RESULT_bfs): 
+        print(f"Step {step}: {' '.join(state)}")
+else:
+    print("No solution found")
