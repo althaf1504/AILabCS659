@@ -1,0 +1,35 @@
+import random
+
+def generate_k_sat(k, m, n):
+    clauses = []
+    for _ in range(m):
+        chosen_vars = random.sample(range(1, n + 1), k)
+        clause = []
+        for v in chosen_vars:
+            sign = random.choice([1, -1])
+            clause.append(sign * v)
+        clauses.append(clause)
+    return clauses
+
+def show_formula(clauses):
+    parts = []
+    for clause in clauses:
+        literals = []
+        for lit in clause:
+            if lit > 0:
+                literals.append(f"x{lit}")
+            else:
+                literals.append(f"¬x{-lit}")
+        parts.append("(" + " ∨ ".join(literals) + ")")
+    return " ∧ ".join(parts)
+
+k = int(input("Enter k (clause length): "))
+m = int(input("Enter m (number of clauses): "))
+n = int(input("Enter n (number of variables): "))
+
+# Generate formula
+formula = generate_k_sat(k, m, n)
+
+# Show output
+print("\nRandom k-SAT formula:")
+print(show_formula(formula))
