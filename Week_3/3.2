@@ -1,0 +1,155 @@
+import random
+from itertools import combinations
+
+# -------------------------------
+# Part 1: Generate uniform random 3-SAT
+# -------------------------------
+def generate_3sat(n, m):
+    """
+    Generates a random 3-SAT instance.
+    Returns a list of m clauses, each clause is a list of 3 literals.
+    Positive integer = variable, Negative integer = negated variable.
+    """
+    clauses = []
+    for _ in range(m):
+        clause = random.sample(range(1, n+1), 3)
+        clause = [x if random.random() < 0.5 else -x for x in clause]
+        clauses.append(clause)
+    return clauses
+
+# -------------------------------
+# Part 2: Heuristic Functions
+# -------------------------------
+def heuristic1(solution, clauses):
+    # Number of satisfied clauses
+    satisfied = 0
+    for clause in clauses:
+        if any((lit > 0 and solution[abs(lit)-1]) or (lit < 0 and not solution[abs(lit)-1]) for lit in clause):
+            satisfied += 1
+    return satisfied
+
+def heuristic2(solution, clauses):
+    # Weighted heuristic: +1 for satisfied, -1 for unsatisfied
+    score = 0
+    for clause in clauses:
+        if any((lit > 0 and solution[abs(lit)-1]) or (lit < 0 and not solution[abs(lit)-1]) for lit in clause):
+            score += 1
+        else:
+            score -= 1
+    return score
+
+# -------------------------------
+# Part 3: Hill-Climbing
+# -------------------------------
+def hill_climbing(n, clauses, heuristic):
+    solution = [random.choice([True, False]) for _ in range(n)]
+    best_score = heuristic(solution, clauses)
+    
+    improved = True
+    while improved:
+        improved = False
+        for i in range(n):
+            neighbor = solution.copy()
+            neighbor[i] = not neighbor[i]
+            score = heuristic(neighbor, clauses)
+            if score > best_score:
+                solution = neighbor
+                best_score = score
+                improved = True
+    return solution, best_score
+
+# -------------------------------
+# Part 4: Beam Search
+# -------------------------------
+def beam_search(n, clauses, heuristic, beam_width=3):
+    beam = [[random.choice([True, False]) for _ in range(n)] for _ in range(beam_width)]
+    best_solution = None
+    best_score = float('-inf')
+    
+    for _ in range(50):  # iterations
+        neighbors = []
+        for sol in beam:
+            for i in range(n):
+                neighbor = sol.copy()
+                neighbor[i] = not neighbor[i]
+                neighbors.append(neighbor)
+        neighbors.sort(key=lambda x: heuristic(x, clauses), reverse=True)
+        beam = neighbors[:beam_width]
+        score = heuristic(beam[0], clauses)
+        if score > best_score:
+            best_score = score
+            best_solution = beam[0]
+    return best_solution, best_score
+
+# -------------------------------
+# Part 5: Variable Neighborhood Descent (VND)
+# -------------------------------
+def variable_neighborhood_descent(n, clauses, heuristic):
+    solution = [random.choice([True, False]) for _ in range(n)]
+    best_score = heuristic(solution, clauses)
+    
+    neighborhoods = [1, 2, 3]  # flip 1, 2, or 3 variables
+    
+    improved = True
+    while improved:
+        improved = False
+        for k in neighborhoods:
+            for indices in combinations(range(n), k):
+                neighbor = solution.copy()
+                for i in indices:
+                    neighbor[i] = not neighbor[i]
+                score = heuristic(neighbor, clauses)
+                if score > best_score:
+                    solution = neighbor
+                    best_score = score
+                    improved = True
+                    break
+            if improved:
+                break
+    return solution, best_score
+
+# -------------------------------
+# Part 6: Penetrance
+# -------------------------------
+def penetrance(solution, clauses):
+    satisfied = sum(
+        any((lit > 0 and solution[abs(lit)-1]) or (lit < 0 and not solution[abs(lit)-1]) for lit in clause)
+        for clause in clauses
+    )
+    return satisfied / len(clauses)
+
+# -------------------------------
+# Part 7: Run Experiments
+# -------------------------------
+n_values = [10, 15]       # number of variables
+m_values = [40, 50, 60]   # number of clauses
+
+results = []
+
+for n in n_values:
+    for m in m_values:
+        clauses = generate_3sat(n, m)
+        for heuristic in [heuristic1, heuristic2]:
+            hc_sol, hc_score = hill_climbing(n, clauses, heuristic)
+            bs3_sol, bs3_score = beam_search(n, clauses, heuristic, beam_width=3)
+            bs4_sol, bs4_score = beam_search(n, clauses, heuristic, beam_width=4)
+            vnd_sol, vnd_score = variable_neighborhood_descent(n, clauses, heuristic)
+            
+            results.append({
+                "n": n,
+                "m": m,
+                "heuristic": heuristic._name_,
+                "Hill-Climbing": penetrance(hc_sol, clauses),
+                "Beam-Search-3": penetrance(bs3_sol, clauses),
+                "Beam-Search-4": penetrance(bs4_sol, clauses),
+                "VND": penetrance(vnd_sol, clauses)
+            })
+
+# -------------------------------
+# Part 8: Display Results
+# -------------------------------
+print(f"{'n':<5}{'m':<5}{'Heuristic':<12}{'Hill-Climb':<12}{'Beam3':<8}{'Beam4':<8}{'VND':<8}")
+print("-"*60)
+for res in results:
+    print(f"{res['n']:<5}{res['m']:<5}{res['heuristic']:<12}{res['Hill-Climbing']:<12.2f}"
+          f"{res['Beam-Search-3']:<8.2f}{res['Beam-Search-4']:<8.2f}{res['VND']:<8.2f}")
