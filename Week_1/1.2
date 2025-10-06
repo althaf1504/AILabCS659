@@ -1,0 +1,31 @@
+# DFS function to find a path (not guaranteed to be shortest)
+def dfs_rabbit_leap(initial, goal):
+    stack = [(initial, [initial])]   # stack instead of queue
+    visited = set()
+
+    while stack:
+        state, path = stack.pop()    # LIFO (last in, first out)
+        state_tuple = tuple(state)
+
+        if state == goal:
+            return path
+
+        if state_tuple not in visited:
+            visited.add(state_tuple)
+            for neighbor in get_neighbors(state):
+                neighbor_tuple = tuple(neighbor)
+                if neighbor_tuple not in visited:
+                    stack.append((neighbor, path + [neighbor]))
+
+    return None
+
+# Solve DFS
+RESULT_dfs = dfs_rabbit_leap(initial_state, goal_state)
+
+# Print solution step-by-step
+if RESULT_dfs:
+    for step, state in enumerate(RESULT_dfs):
+        print(f"Step {step}: {' '.join(state)}")
+else:
+    print("No solution found")
+    
