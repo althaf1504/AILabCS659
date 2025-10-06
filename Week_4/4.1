@@ -1,0 +1,120 @@
+
+import numpy as np
+import random
+import math
+import matplotlib.pyplot as plt
+from skimage import color, io, transform
+
+# -------------------------
+# Step 1: Split and Combine Image (State Representation)
+# -------------------------
+def split_image(image, grid_size):
+    """Cut the image into grid_size x grid_size tiles"""
+    h, w = image.shape
+    tile_h, tile_w = h // grid_size, w // grid_size
+    tiles = []
+    for i in range(grid_size):
+        for j in range(grid_size):
+            tiles.append(image[i*tile_h:(i+1)*tile_h, j*tile_w:(j+1)*tile_w])
+    return tiles
+
+def combine_image(tiles, grid_size, shape):
+    """Put tiles back together to rebuild the image"""
+    h, w = shape
+    tile_h, tile_w = h // grid_size, w // grid_size
+    img = np.zeros((h, w), dtype=tiles[0].dtype)
+    idx = 0
+    for i in range(grid_size):
+        for j in range(grid_size):
+            img[i*tile_h:(i+1)*tile_h, j*tile_w:(j+1)*tile_w] = tiles[idx]
+            idx += 1
+    return img
+
+# -------------------------
+# Step 2: Move (Swap Two Tiles)
+# -------------------------
+def random_move(state):
+    new_state = state[:]
+    i, j = random.sample(range(len(state)), 2)  # pick two random tiles
+    new_state[i], new_state[j] = new_state[j], new_state[i]  # swap them
+    return new_state
+
+# -------------------------
+# Step 3: Heuristic (How Good is Puzzle?)
+# -------------------------
+def heuristic(state, goal):
+    """Count number of tiles in the correct place"""
+    return sum(1 for i in range(len(state)) if np.array_equal(state[i], goal[i]))
+
+# -------------------------
+# Step 4: Simulated Annealing
+# -------------------------
+def simulated_annealing(scrambled, goal, grid_size, max_steps=5000, temp=100.0, cooling=0.99):
+    current = scrambled[:]
+    current_score = heuristic(current, goal)
+
+    for step in range(max_steps):
+        if current_score == len(goal):  # Puzzle solved!
+            break
+
+        new_state = random_move(current)
+        new_score = heuristic(new_state, goal)
+
+        # Accept if better
+        if new_score > current_score:
+            current, current_score = new_state, new_score
+        else:
+            # Maybe accept if worse (depending on temperature)
+            prob = math.exp((new_score - current_score) / temp)
+            if random.random() < prob:
+                current, current_score = new_state, new_score
+
+        # Cool down temperature
+        temp *= cooling
+
+        # Show progress every 500 steps
+        if step % 500 == 0:
+            img = combine_image(current, grid_size, (256, 256))
+            plt.imshow(img, cmap='gray')
+            plt.title(f"Step {step}, Score {current_score}")
+            plt.pause(0.1)
+            plt.clf()
+
+    return current
+
+# -------------------------
+# Step 5: Run Example with User-Selected Image
+# -------------------------
+if _name_ == "_main_":
+    # Ask user for image path
+    path = input("Enter the path to your image file (or press Enter for default astronaut): ").strip()
+
+    if path:
+        # Load user image
+        img = io.imread(path)
+
+        # Convert to grayscale if RGB
+        if img.ndim == 3:
+            img = color.rgb2gray(img)
+
+        # Resize to 256x256 for simplicity
+        img = transform.resize(img, (256, 256), anti_aliasing=True)
+    else:
+        # Default astronaut image
+        from skimage import data
+        img = color.rgb2gray(data.astronaut())
+        img = img[:256, :256]
+
+    grid_size = 4  # 4x4 puzzle
+    goal_tiles = split_image(img, grid_size)   # correct order
+    scrambled_tiles = goal_tiles[:]
+    random.shuffle(scrambled_tiles)  # shuffle tiles
+
+    # Solve using simulated annealing
+    solved = simulated_annealing(scrambled_tiles, goal_tiles, grid_size)
+
+    # Show final solved result
+    result_img = combine_image(solved, grid_size, img.shape)
+    plt.imshow(result_img, cmap='gray')
+    plt.title("Solved Puzzle")
+    plt.show()
